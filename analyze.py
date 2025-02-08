@@ -3,9 +3,9 @@ import numpy as np
 from scipy.stats import norm  # ガウス分布のパーセンタイル計算用
 import matplotlib.pyplot as plt
 import os
+from extract_data import SELECT_COLOR, DEFAULT_COLOR
 
-ROOT_DIR = "/Users/iwakitakuma/image_j_pro"
-# ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
+ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
 DATA_DIR = ROOT_DIR + "/data/"
 POSITION_DIR = ROOT_DIR + "/positions/"
 EXTRACTED_DIR = ROOT_DIR + "/extracted_data/"
@@ -13,15 +13,20 @@ RESULT_DIR = ROOT_DIR + "/results/"
 
 
 csv_filename = POSITION_DIR + "positions.csv"
-THRESHOLD = None
-NORM_PPF_P = 0.4
+THRESHOLD = 70
+NORM_PPF_P = 0.2
 
-NUM_BINS = 20
+NUM_BINS = 25
 with open(csv_filename, "r") as csvfile:
     reader = csv.DictReader(csvfile)  # 各行を辞書として読み込む
     data = [row for row in reader]  # リストに変換
 
-data_dict = {d["file_name"]: d for d in data}
+data_dict = {
+    d["file_name"]: d
+    for d in data
+    if d["file_name"] in SELECT_COLOR
+    and d["color"] == SELECT_COLOR.get(d["file_name"], DEFAULT_COLOR)
+}
 
 
 def line_equation(start, end):
@@ -46,20 +51,26 @@ def perpendicular_intersection(x, y, a, b):
         return x_p, y_p
 
 
-def get_intersection_order(points, start, end):
+def get_intersection_order(points, start, end, file_name):
     """各点から直線への垂線の交点を求め、start から end までの順番で並べる"""
     a, b = line_equation(start, end)
-    intersections = []
+    _intersections = []
 
     for x, y, value in points:
         x_p, y_p = perpendicular_intersection(x, y, a, b)
-        distance = np.sqrt(
-            (x_p - start[0]) ** 2 + (y_p - start[1]) ** 2
-        )  # 直線上の距離
-        intersections.append((x_p, y_p, value, distance))
+        distance = np.sqrt((x_p - end[0]) ** 2 + (y_p - end[1]) ** 2)  # 直線上の距離
+        _intersections.append((x_p, y_p, value, distance))
 
-    # 直線の進行方向（start → end）に沿って並べる
-    intersections.sort(key=lambda p: p[3])  # 距離でソート
+    _intersections.sort(key=lambda p: p[3], reverse=True)  # 距離でソート
+    start = _intersections[0]
+    intersections = []
+    for intersection in _intersections:
+        distance = np.sqrt(
+            (intersection[0] - start[0]) ** 2 + (intersection[1] - start[1]) ** 2
+        )
+        intersections.append(
+            (intersection[0], intersection[1], intersection[2], distance)
+        )
     return intersections
 
 
@@ -77,7 +88,6 @@ def compute_average_values(intersections, num_bins=NUM_BINS):
     for x_p, y_p, value, distance in intersections:
         bin_index = min(int((distance - start_distance) / bin_size), num_bins - 1)
         bins[bin_index].append(value)
-
     average_values = [np.mean(bin) if bin else 0 for bin in bins]
     return average_values
 
@@ -153,14 +163,16 @@ for file_name, position in data_dict.items():
     dna_data_values = [
         (int(d["X"]), int(d["Y"]), int(d["Intensity"])) for d in dna_data
     ]
-    dna_ordered_intersections = get_intersection_order(dna_data_values, start, end)
+    dna_ordered_intersections = get_intersection_order(
+        dna_data_values, start, end, file_name
+    )
     dna_average_values = compute_average_values(dna_ordered_intersections)
 
     target_data_values = [
         (int(d["X"]), int(d["Y"]), int(d["Intensity"])) for d in target_data
     ]
     target_ordered_intersections = get_intersection_order(
-        target_data_values, start, end
+        target_data_values, start, end, file_name
     )
     target_average_values = compute_average_values(target_ordered_intersections)
 

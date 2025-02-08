@@ -6,14 +6,13 @@ import csv
 import matplotlib.pyplot as plt
 import os
 
-ROOT_DIR = "/Users/iwakitakuma/image_j_pro"
-# ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
+ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
 DATA_DIR = ROOT_DIR + "/data/"
 POSITION_DIR = ROOT_DIR + "/positions/"
-DEFAULT_MARGIN = 1
 file_names = ["Untitled189.czi", "Untitled197.czi"]
 
-MARGIN_DICT = {"Untitled189.czi": 1}
+DEFAULT_MARGIN = 1
+MARGIN_DICT = {"Untitled189.czi": 10}
 
 if not file_names:
     file_names = os.listdir(DATA_DIR)
