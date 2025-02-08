@@ -10,7 +10,7 @@ ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
 # ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
 DATA_DIR = ROOT_DIR + "/data/"
 POSITION_DIR = ROOT_DIR + "/positions/"
-file_names = ["Untitled189.czi", "Untitled197.czi"]
+file_names = []
 
 DEFAULT_MARGIN = 1
 MARGIN_DICT = {"Untitled189.czi": 10}

@@ -25,8 +25,7 @@ with open(csv_filename, "r") as csvfile:
 data_dict = {
     d["file_name"]: d
     for d in data
-    if d["file_name"] in SELECT_COLOR
-    and d["color"] == SELECT_COLOR.get(d["file_name"], DEFAULT_COLOR)
+    if d["color"] == SELECT_COLOR.get(d["file_name"], DEFAULT_COLOR)
 }
 
 
