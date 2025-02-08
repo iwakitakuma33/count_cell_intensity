@@ -1,0 +1,5 @@
+numpy
+scipy
+matplotlib
+czifile
+opencv-python-headless

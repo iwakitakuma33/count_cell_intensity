@@ -1,0 +1,12 @@
+setup
+pip install -r requirements.txt
+
+1. pre_process_czi.py
+pythonで実行
+成果物はpositionsに出力
+2. extract_data.py
+imageJで実行
+成果物はextract_dataに出力
+3. analyze.py
+pythonで実行
+成果物はresultsに出力
