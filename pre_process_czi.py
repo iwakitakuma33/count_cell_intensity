@@ -6,6 +6,7 @@ import csv
 import matplotlib.pyplot as plt
 import os
 
+
 # ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
 ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
 DATA_DIR = ROOT_DIR + "/data/"
@@ -17,6 +18,12 @@ MARGIN_DICT = {"Untitled189.czi": 10}
 
 if not file_names:
     file_names = os.listdir(DATA_DIR)
+
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
+if not os.path.exists(POSITION_DIR):
+    os.makedirs(POSITION_DIR)
+
 
 colors = {
     "blue": (255, 0, 0),

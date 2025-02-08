@@ -12,6 +12,14 @@ POSITION_DIR = ROOT_DIR + "/positions/"
 EXTRACTED_DIR = ROOT_DIR + "/extracted_data/"
 RESULT_DIR = ROOT_DIR + "/results/"
 
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
+if not os.path.exists(POSITION_DIR):
+    os.makedirs(POSITION_DIR)
+if not os.path.exists(EXTRACTED_DIR):
+    os.makedirs(EXTRACTED_DIR)
+if not os.path.exists(RESULT_DIR):
+    os.makedirs(RESULT_DIR)
 
 csv_filename = POSITION_DIR + "positions.csv"
 THRESHOLD = 70
