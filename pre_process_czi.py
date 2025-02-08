@@ -4,15 +4,19 @@ import numpy as np
 from matplotlib.widgets import Cursor
 import csv
 import matplotlib.pyplot as plt
+import os
 
-ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
+ROOT_DIR = "/Users/iwakitakuma/image_j_pro"
+# ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
 DATA_DIR = ROOT_DIR + "/data/"
 POSITION_DIR = ROOT_DIR + "/positions/"
 DEFAULT_MARGIN = 1
 file_names = ["Untitled189.czi", "Untitled197.czi"]
-# 全部読み込むようにする。
-# file_namesがあればそれのみにする。
+
 MARGIN_DICT = {"Untitled189.czi": 1}
+
+if not file_names:
+    file_names = os.listdir(DATA_DIR)
 
 colors = {
     "blue": (255, 0, 0),
@@ -79,7 +83,7 @@ def object_position(file_name):
             if w * h > min_white_object_area
         ]
 
-        results = []
+        results = {}
         if filtered_white_objects:
             fig, ax = plt.subplots(figsize=(8, 8))
             curor = Cursor(ax, useblit=True, color="red", linewidth=1)
@@ -106,18 +110,16 @@ def object_position(file_name):
                     image_with_objects, (centroid_x, centroid_y), 5, (0, 0, 255), -1
                 )
 
-                results.append(
-                    {
-                        "file_name": file_name,
-                        "x": x1,
-                        "y": y1,
-                        "w": w_new,
-                        "h": h_new,
-                        "centroid_x": centroid_x,
-                        "centroid_y": centroid_y,
-                        "color": color_name_list[idx],
-                    }
-                )
+                results[file_name + "." + color_name_list[idx]] = {
+                    "file_name": file_name,
+                    "x": x1,
+                    "y": y1,
+                    "w": w_new,
+                    "h": h_new,
+                    "centroid_x": centroid_x,
+                    "centroid_y": centroid_y,
+                    "color": color_name_list[idx],
+                }
             circle_center = {
                 "x": None,
                 "y": None,
@@ -135,31 +137,41 @@ def object_position(file_name):
                 "どの色を選択するのかメモして"
                 + str(color_name_list[0 : len(filtered_white_objects)])
             )
-            plt.savefig(POSITION_DIR + file_name + ".png")
+            plt.savefig(POSITION_DIR + "images/" + file_name + ".png")
             plt.show()
-            for result in results:
-                result["circle_center_x"] = circle_center["x"]
-                result["circle_center_y"] = circle_center["y"]
+            for key, _ in results.items():
+                results[key]["circle_center_x"] = circle_center["x"]
+                results[key]["circle_center_y"] = circle_center["y"]
             return results
     else:
         print(f"error: {file_name}")
         return None
 
 
-positions = []
+dir_path = POSITION_DIR + "images"
+if not os.path.exists(dir_path):
+    os.makedirs(dir_path)
+
+positions = {}
 for file_name in file_names:
     position = object_position(file_name)
     if position:
-        positions.extend(position)
+        positions.update(position)
 
-
-# CSV ファイルに保存
 csv_filename = POSITION_DIR + "positions.csv"
+data: dict = {}
+if os.path.exists(csv_filename):
+    with open(csv_filename, "r") as csvfile:
+        reader = csv.DictReader(csvfile)  # 各行を辞書として読み込む
+        data = {row["file_name"] + "." + row["color"]: row for row in reader}
+data.update(positions)
+data_list: list[dict] = list(data.values())
+# CSV ファイルに保存
 with open(csv_filename, "w", newline="", encoding="utf-8") as csvfile:
-    fieldnames = positions[0].keys()  # ヘッダーを取得
+    fieldnames = data_list[0].keys()  # ヘッダーを取得
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
     writer.writeheader()  # ヘッダーを書き込む
-    writer.writerows(positions)  # リストの各辞書を1行ずつ書き込む
+    writer.writerows(data_list)  # リストの各辞書を1行ずつ書き込む
 
 print(f"{csv_filename} に保存しました！")

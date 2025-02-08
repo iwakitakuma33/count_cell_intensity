@@ -2,8 +2,10 @@ import csv
 import numpy as np
 from scipy.stats import norm  # ガウス分布のパーセンタイル計算用
 import matplotlib.pyplot as plt
+import os
 
-ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
+ROOT_DIR = "/Users/iwakitakuma/image_j_pro"
+# ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
 DATA_DIR = ROOT_DIR + "/data/"
 POSITION_DIR = ROOT_DIR + "/positions/"
 EXTRACTED_DIR = ROOT_DIR + "/extracted_data/"
@@ -80,13 +82,17 @@ def compute_average_values(intersections, num_bins=NUM_BINS):
     return average_values
 
 
+dna_results = {}
+target_results = {}
+ratio_results = {}
 for file_name, position in data_dict.items():
     print("--------------")
     print("start: " + file_name)
     dna_data = []
     target_data = []
-    dna_path = EXTRACTED_DIR + file_name + "-dna.csv"
-    target_path = EXTRACTED_DIR + file_name + "-target.csv"
+    dir_path = EXTRACTED_DIR + file_name + "/"
+    dna_path = dir_path + file_name + "-dna.csv"
+    target_path = dir_path + file_name + "-target.csv"
     with open(dna_path, "r") as csvfile:
         reader = csv.DictReader(csvfile)  # 各行を辞書として読み込む
         dna_data = [
@@ -174,17 +180,16 @@ for file_name, position in data_dict.items():
     # 軸ラベルとタイトル
     plt.legend()
     plt.grid(True)
-    plt.savefig(RESULT_DIR + file_name + "-ratio.png")
-    txt_filename = RESULT_DIR + file_name + "-dna.txt"
-    with open(txt_filename, "w", encoding="utf-8") as txtfile:
-        txtfile.write(",".join(map(str, dna_average_values)))
-    txt_filename = RESULT_DIR + file_name + "-target.txt"
-    with open(txt_filename, "w", encoding="utf-8") as txtfile:
-        txtfile.write(",".join(map(str, target_average_values)))
-    txt_filename = RESULT_DIR + file_name + "-ratio.txt"
-    with open(txt_filename, "w", encoding="utf-8") as txtfile:
-        txtfile.write(",".join(map(str, ratio_values)))
-    plt.show()
+    dir_path = RESULT_DIR + file_name + "/"
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
+    plt.savefig(dir_path + file_name + "-ratio.png")
+
+    prefix = file_name.rstrip(".czi")
+    dna_results[prefix] = dna_average_values
+    target_results[prefix] = target_average_values
+    ratio_results[prefix] = ratio_values
 
     # グラフの描画
     x_values = list(range(len(dna_average_values)))  # X軸: 各区間のインデックス
@@ -196,8 +201,7 @@ for file_name, position in data_dict.items():
     # 軸ラベルとタイトル
     plt.legend()
     plt.grid(True)
-    plt.savefig(RESULT_DIR + file_name + "-dna.png")
-    plt.show()
+    plt.savefig(dir_path + file_name + "-dna.png")
 
     x_values = list(range(len(target_average_values)))  # X軸: 各区間のインデックス
     y_values = target_average_values  # Y軸: 計算された比率
@@ -208,8 +212,21 @@ for file_name, position in data_dict.items():
     # 軸ラベルとタイトル
     plt.legend()
     plt.grid(True)
-    plt.savefig(RESULT_DIR + file_name + "-target.png")
-    plt.show()
+    plt.savefig(dir_path + file_name + "-target.png")
+print("---------- end save imgs")
 
+txt_filename = RESULT_DIR + "dna.csv"
+with open(txt_filename, "w", encoding="utf-8") as txtfile:
+    writer = csv.writer(txtfile)
+    writer.writerows([[k, *v] for k, v in dna_results.items()])
+txt_filename = RESULT_DIR + "target.csv"
+with open(txt_filename, "w", encoding="utf-8") as txtfile:
+    writer = csv.writer(txtfile)
+    writer.writerows([[k, *v] for k, v in target_results.items()])
+
+txt_filename = RESULT_DIR + "ratio.csv"
+with open(txt_filename, "w", encoding="utf-8") as txtfile:
+    writer = csv.writer(txtfile)
+    writer.writerows([[k, *v] for k, v in ratio_results.items()])
 
 print("end")
