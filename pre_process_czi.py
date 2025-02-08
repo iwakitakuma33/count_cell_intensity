@@ -5,11 +5,13 @@ from matplotlib.widgets import Cursor
 import csv
 import matplotlib.pyplot as plt
 
-ROOT_DIR = "/Users/iwakitakuma/image_j_pro"
+ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
 DATA_DIR = ROOT_DIR + "/data/"
 POSITION_DIR = ROOT_DIR + "/positions/"
 DEFAULT_MARGIN = 1
 file_names = ["Untitled189.czi", "Untitled197.czi"]
+# 全部読み込むようにする。
+# file_namesがあればそれのみにする。
 MARGIN_DICT = {"Untitled189.czi": 1}
 
 colors = {

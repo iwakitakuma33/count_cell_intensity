@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import norm  # ガウス分布のパーセンタイル計算用
 import matplotlib.pyplot as plt
 
-ROOT_DIR = "/Users/iwakitakuma/image_j_pro"
+ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
 DATA_DIR = ROOT_DIR + "/data/"
 POSITION_DIR = ROOT_DIR + "/positions/"
 EXTRACTED_DIR = ROOT_DIR + "/extracted_data/"
@@ -12,9 +12,9 @@ RESULT_DIR = ROOT_DIR + "/results/"
 
 csv_filename = POSITION_DIR + "positions.csv"
 THRESHOLD = None
-NORM_PPF_P = 0.25
-PIXEL_RANGE = 2
-NUM_BINS = 40
+NORM_PPF_P = 0.4
+
+NUM_BINS = 20
 with open(csv_filename, "r") as csvfile:
     reader = csv.DictReader(csvfile)  # 各行を辞書として読み込む
     data = [row for row in reader]  # リストに変換
@@ -168,15 +168,13 @@ for file_name, position in data_dict.items():
 
     # グラフの描画
     plt.figure(figsize=(10, 5))
+    plt.ylim(0, max(y_values) * 1.1)
     plt.plot(x_values, y_values, marker="o", linestyle="-", color="b", label="Ratio")
 
     # 軸ラベルとタイトル
-    plt.xlabel("Segment Index")
-    plt.ylabel("Ratio (Target / DNA)")
-    plt.title("Ratio of Target to DNA Across Segments")
     plt.legend()
     plt.grid(True)
-    plt.savefig(RESULT_DIR + file_name + ".png")
+    plt.savefig(RESULT_DIR + file_name + "-ratio.png")
     txt_filename = RESULT_DIR + file_name + "-dna.txt"
     with open(txt_filename, "w", encoding="utf-8") as txtfile:
         txtfile.write(",".join(map(str, dna_average_values)))
@@ -187,5 +185,31 @@ for file_name, position in data_dict.items():
     with open(txt_filename, "w", encoding="utf-8") as txtfile:
         txtfile.write(",".join(map(str, ratio_values)))
     plt.show()
+
+    # グラフの描画
+    x_values = list(range(len(dna_average_values)))  # X軸: 各区間のインデックス
+    y_values = dna_average_values  # Y軸: 計算された比率
+    plt.figure(figsize=(10, 5))
+    plt.ylim(0, max(y_values) * 1.1)
+    plt.plot(x_values, y_values, marker="o", linestyle="-", color="b", label="Ratio")
+
+    # 軸ラベルとタイトル
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(RESULT_DIR + file_name + "-dna.png")
+    plt.show()
+
+    x_values = list(range(len(target_average_values)))  # X軸: 各区間のインデックス
+    y_values = target_average_values  # Y軸: 計算された比率
+    plt.figure(figsize=(10, 5))
+    plt.ylim(0, max(y_values) * 1.1)
+    plt.plot(x_values, y_values, marker="o", linestyle="-", color="b", label="Ratio")
+
+    # 軸ラベルとタイトル
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(RESULT_DIR + file_name + "-target.png")
+    plt.show()
+
 
 print("end")
