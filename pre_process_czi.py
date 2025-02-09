@@ -161,9 +161,10 @@ if not os.path.exists(dir_path):
 
 positions = {}
 for file_name in file_names:
-    position = object_position(file_name)
-    if position:
-        positions.update(position)
+    if file_name.endswith(".czi"):
+        position = object_position(file_name)
+        if position:
+            positions.update(position)
 
 csv_filename = POSITION_DIR + "positions.csv"
 data: dict = {}

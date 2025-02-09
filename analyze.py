@@ -111,6 +111,9 @@ for file_name, position in data_dict.items():
     dir_path = EXTRACTED_DIR + file_name + "/"
     dna_path = dir_path + file_name + "-dna.csv"
     target_path = dir_path + file_name + "-target.csv"
+    if not os.path.exists(dna_path):
+        print("not analyze " + file_name + " because not found csv file")
+        continue
     with open(dna_path, "r") as csvfile:
         reader = csv.DictReader(csvfile)  # 各行を辞書として読み込む
         dna_data = [
@@ -165,6 +168,12 @@ for file_name, position in data_dict.items():
         )
     print("filled target data pixels: " + str(len(target_data)))
 
+    try:
+        int(position["circle_center_x"])
+        int(position["circle_center_y"])
+    except:
+        print("not analyze " + file_name + " because not selected circle center")
+        continue
     start = (int(position["centroid_x"]), int(position["centroid_y"]))
     end = (int(position["circle_center_x"]), int(position["circle_center_y"]))
 
