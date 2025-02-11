@@ -67,23 +67,19 @@ def object_position(file_name):
     if filtered_black_contours:
         largest_black_contour = max(filtered_black_contours, key=cv2.contourArea)
 
-        # 黒い領域のマスクを作成
         black_mask = np.zeros_like(second_image)
         cv2.drawContours(
             black_mask, [largest_black_contour], -1, (255), thickness=cv2.FILLED
         )
 
-        # 黒い領域内の白い部分を抽出
         white_in_black = cv2.bitwise_and(second_image, second_image, mask=black_mask)
 
-        # 白いオブジェクトを検出
         _, binary_white = cv2.threshold(white_in_black, 50, 255, cv2.THRESH_BINARY)
         contours_white, _ = cv2.findContours(
             binary_white, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
 
-        # **小さすぎるオブジェクトを削除**
-        min_white_object_area = 500  # 小さなノイズを削除する閾値
+        min_white_object_area = 500
         filtered_white_objects = [
             (x, y, w, h)
             for (x, y, w, h) in [cv2.boundingRect(cnt) for cnt in contours_white]
@@ -96,16 +92,16 @@ def object_position(file_name):
             curor = Cursor(ax, useblit=True, color="red", linewidth=1)
             ax.set_title(f"Detected Object in {file_name} (Brightness Increased)")
             ax.axis("off")
-            bright_image = adjust_gamma(second_image, gamma=1.8)  # 表示用のガンマ補正
+            bright_image = adjust_gamma(second_image, gamma=1.8)
             image_with_objects = cv2.cvtColor(bright_image, cv2.COLOR_GRAY2BGR)
 
             for idx, white_object in enumerate(filtered_white_objects):
                 margin = MARGIN_DICT.get(file_name, DEFAULT_MARGIN)
                 x, y, w, h = white_object
-                x1, y1 = max(0, x - margin), max(0, y - margin)  # 左上
-                x1, y1 = max(0, x - margin), max(0, y - margin)  # 左上
-                w_new, h_new = w + 2 * margin, h + 2 * margin  # 調整後の幅と高さ
-                x4, y4 = x1 + w + 2 * margin, y1 + h + 2 * margin  # 右下
+                x1, y1 = max(0, x - margin), max(0, y - margin)
+                x1, y1 = max(0, x - margin), max(0, y - margin)
+                w_new, h_new = w + 2 * margin, h + 2 * margin
+                x4, y4 = x1 + w + 2 * margin, y1 + h + 2 * margin
 
                 centroid_x = (x1 + x4) // 2
                 centroid_y = (y1 + y4) // 2
@@ -137,7 +133,6 @@ def object_position(file_name):
                     circle_center["x"] = int(event.xdata)
                     circle_center["y"] = int(event.ydata)
 
-            # クリックイベントを登録
             fig.canvas.mpl_connect("button_press_event", on_click)
             ax.imshow(image_with_objects, cmap="gray")
             print(
@@ -170,16 +165,16 @@ csv_filename = POSITION_DIR + "positions.csv"
 data: dict = {}
 if os.path.exists(csv_filename):
     with open(csv_filename, "r") as csvfile:
-        reader = csv.DictReader(csvfile)  # 各行を辞書として読み込む
+        reader = csv.DictReader(csvfile)
         data = {row["file_name"] + "." + row["color"]: row for row in reader}
 data.update(positions)
 data_list: list[dict] = list(data.values())
-# CSV ファイルに保存
+
 with open(csv_filename, "w", newline="", encoding="utf-8") as csvfile:
-    fieldnames = data_list[0].keys()  # ヘッダーを取得
+    fieldnames = data_list[0].keys()
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-    writer.writeheader()  # ヘッダーを書き込む
-    writer.writerows(data_list)  # リストの各辞書を1行ずつ書き込む
+    writer.writeheader()
+    writer.writerows(data_list)
 
 print(f"{csv_filename} に保存しました！")

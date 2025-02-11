@@ -1,12 +1,13 @@
 import csv
 import numpy as np
-from scipy.stats import norm  # ガウス分布のパーセンタイル計算用
+from scipy.stats import norm
 import matplotlib.pyplot as plt
 import os
 import cv2
 from extract_data import SELECT_COLOR, DEFAULT_COLOR
 import imageio
 from copy import deepcopy
+
 
 # ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
 ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
@@ -26,11 +27,9 @@ csv_filename = POSITION_DIR + "positions.csv"
 NORM_LIST = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95]
 
 
-# NORM_LIST = [0.7, 0.8, 0.9, 0.95]
-
 with open(csv_filename, "r") as csvfile:
-    reader = csv.DictReader(csvfile)  # 各行を辞書として読み込む
-    data = [row for row in reader]  # リストに変換
+    reader = csv.DictReader(csvfile)
+    data = [row for row in reader]
 
 data_dict = {
     d["file_name"]: d
@@ -56,7 +55,7 @@ for file_name, position in data_dict.items():
         continue
 
     with open(dna_path, "r") as csvfile:
-        reader = csv.DictReader(csvfile)  # 各行を辞書として読み込む
+        reader = csv.DictReader(csvfile)
         dna_data = [
             {
                 "X": float(row["X"]),
@@ -65,7 +64,7 @@ for file_name, position in data_dict.items():
                 "Key": row["X"] + row["Y"],
             }
             for row in reader
-        ]  # リストに変換
+        ]
 
     output_dir = THRESHOLD_DIR + file_name + "/"
     if not os.path.exists(output_dir):
@@ -87,7 +86,7 @@ for file_name, position in data_dict.items():
         g_image = imageio.v3.imread(output_path)
         g_image = g_image.astype(np.uint8)
         threshold = norm.ppf(norm_ppf, mean, std)
-        threshold = max(0, threshold)  # 負の値にならないように制限
+        threshold = max(0, threshold)
 
         metadata = ["=============="]
         metadata.append("norm ppf p: " + str(norm_ppf))
@@ -115,12 +114,7 @@ for file_name, position in data_dict.items():
     thre, b_img = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     bright_pixels = np.column_stack(np.where(b_img == 255))
     filtered_pixels = bright_pixels
-    # filtered_pixels = bright_pixels[
-    #     (bright_pixels[:, 1] >= int(position["x"]))
-    #     & (bright_pixels[:, 1] < int(position["x"]) + int(position["w"]))  # x の範囲
-    #     & (bright_pixels[:, 0] >= int(position["y"]))
-    #     & (bright_pixels[:, 0] < int(position["y"]) + int(position["h"]))  # y の範囲
-    # ]
+
     _dna_data = [d for d in dna_data if int(d["Intensity"]) > roi_thre]
     dna_x_y = [(int(d["X"]), int(d["Y"])) for d in _dna_data]
     g_image = imageio.v3.imread(output_path)

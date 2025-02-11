@@ -24,8 +24,8 @@ if __name__ == "__main__":
     import os
 
     with open(csv_filename, "r") as csvfile:
-        reader = csv.DictReader(csvfile)  # 各行を辞書として読み込む
-        data = [row for row in reader]  # リストに変換
+        reader = csv.DictReader(csvfile)
+        data = [row for row in reader]
 
     data_dict = {
         d["file_name"]: d
@@ -63,17 +63,15 @@ if __name__ == "__main__":
             output_path = dir_path + file_name + "-" + name + ".csv"
             with open(output_path, "w") as csvfile:
                 writer = csv.writer(csvfile)
-                writer.writerow(["X", "Y", "Intensity"])  # ヘッダー行
-                writer.writerows(pixels)  # データを書き込み
+                writer.writerow(["X", "Y", "Intensity"])
+                writer.writerows(pixels)
 
         ImporterOptions = importlib.import_module("loci.plugins.in").ImporterOptions
         options = ImporterOptions()
         options.setId(IMG_URL)
-        options.setSplitChannels(True)  # チャンネルを分ける
-        options.setColorMode(
-            ImporterOptions.COLOR_MODE_DEFAULT
-        )  # 各チャンネルを個別に取得
-        imps = BF.openImagePlus(options)  # チャンネルごとに ImagePlus を取得
+        options.setSplitChannels(True)
+        options.setColorMode(ImporterOptions.COLOR_MODE_DEFAULT)
+        imps = BF.openImagePlus(options)
         print(len(imps))
         extract(imps[0], "target")
         extract(imps[1], "dna")
