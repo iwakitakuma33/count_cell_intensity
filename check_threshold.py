@@ -9,8 +9,8 @@ import imageio
 from copy import deepcopy
 
 
-ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
-# ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
+ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
+# ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
 POSITION_DIR = ROOT_DIR + "/positions/"
 EXTRACTED_DIR = ROOT_DIR + "/extracted_data/"
 THRESHOLD_DIR = ROOT_DIR + "/threshold/"

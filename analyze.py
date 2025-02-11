@@ -7,8 +7,8 @@ import os
 from extract_data import SELECT_COLOR, DEFAULT_COLOR
 
 
-ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
-# ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
+ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
+# ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
 DATA_DIR = ROOT_DIR + "/data/"
 POSITION_DIR = ROOT_DIR + "/positions/"
 EXTRACTED_DIR = ROOT_DIR + "/extracted_data/"
@@ -26,7 +26,6 @@ if not os.path.exists(RESULT_DIR):
 csv_filename = POSITION_DIR + "positions.csv"
 NORM_PPF_P = 0.5
 PPF_DICT = {"Untitled189.czi": 0.5}
-# PPF_DICT = {"Untitled189.czi": 0.4}
 
 NUM_BINS = 15
 with open(csv_filename, "r") as csvfile:

@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import os
 
 
-ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
-# ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
+ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
+# ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
 DATA_DIR = ROOT_DIR + "/data/"
 POSITION_DIR = ROOT_DIR + "/positions/"
 file_names = []
