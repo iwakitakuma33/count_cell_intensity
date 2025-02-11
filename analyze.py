@@ -1,3 +1,4 @@
+import cv2
 import csv
 import numpy as np
 from scipy.stats import norm  # ガウス分布のパーセンタイル計算用
@@ -22,8 +23,9 @@ if not os.path.exists(RESULT_DIR):
     os.makedirs(RESULT_DIR)
 
 csv_filename = POSITION_DIR + "positions.csv"
-THRESHOLD = 70
+THRESHOLD = None
 NORM_PPF_P = 0.2
+PPF_DICT = {"Untitled189.czi": 0.4}
 
 NUM_BINS = 25
 with open(csv_filename, "r") as csvfile:
@@ -111,6 +113,7 @@ for file_name, position in data_dict.items():
     dir_path = EXTRACTED_DIR + file_name + "/"
     dna_path = dir_path + file_name + "-dna.csv"
     target_path = dir_path + file_name + "-target.csv"
+    prefix = file_name.rstrip(".czi")
     if not os.path.exists(dna_path):
         print("not analyze " + file_name + " because not found csv file")
         continue
@@ -143,7 +146,7 @@ for file_name, position in data_dict.items():
             [float(d["Intensity"]) for d in dna_data], dtype=np.float32
         )
         mean, std = np.mean(dna_data_intensity), np.std(dna_data_intensity)
-        threshold = norm.ppf(NORM_PPF_P, mean, std)
+        threshold = norm.ppf(PPF_DICT.get(file_name, NORM_PPF_P), mean, std)
         threshold = max(0, threshold)  # 負の値にならないように制限
 
     print("threshold: " + str(threshold))
@@ -215,7 +218,6 @@ for file_name, position in data_dict.items():
 
     plt.savefig(dir_path + file_name + "-ratio.png")
 
-    prefix = file_name.rstrip(".czi")
     dna_results[prefix] = dna_average_values
     target_results[prefix] = target_average_values
     ratio_results[prefix] = ratio_values

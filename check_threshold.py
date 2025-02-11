@@ -3,6 +3,7 @@ import numpy as np
 from scipy.stats import norm  # ガウス分布のパーセンタイル計算用
 import matplotlib.pyplot as plt
 import os
+import cv2
 from extract_data import SELECT_COLOR, DEFAULT_COLOR
 import imageio
 from copy import deepcopy
@@ -23,6 +24,8 @@ if not os.path.exists(THRESHOLD_DIR):
 
 csv_filename = POSITION_DIR + "positions.csv"
 NORM_LIST = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95]
+
+
 # NORM_LIST = [0.7, 0.8, 0.9, 0.95]
 
 with open(csv_filename, "r") as csvfile:
@@ -92,7 +95,6 @@ for file_name, position in data_dict.items():
         metadata_list.append("\n".join(metadata))
         _dna_data = [d for d in _dna_data if int(d["Intensity"]) > threshold]
         dna_x_y = [(int(d["X"]), int(d["Y"])) for d in _dna_data]
-        print(len(dna_x_y))
         for x, y in dna_x_y:
             if 0 <= y < g_image.shape[0] and 0 <= x < g_image.shape[1]:
                 g_image[y, x] = [0, 220, 0, 20]
@@ -100,6 +102,34 @@ for file_name, position in data_dict.items():
         _output_path = output_dir + prefix + "-dna-" + str(norm_ppf) + ".png"
         imageio.v3.imwrite(_output_path, g_image)
 
+    image = cv2.imread(input_path, cv2.IMREAD_GRAYSCALE)
+    height, width = image.shape
+    x, y = max(0, int(position["x"])), max(0, int(position["y"]))
+    w, h = (
+        min(width - int(position["x"]), int(position["w"])),
+        min(height - int(position["y"]), int(position["h"])),
+    )
+    roi = image[y : y + h, x : x + w]
+    roi_thre, roi_bin = cv2.threshold(roi, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    thre, b_img = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    bright_pixels = np.column_stack(np.where(b_img == 255))
+    filtered_pixels = bright_pixels
+    # filtered_pixels = bright_pixels[
+    #     (bright_pixels[:, 1] >= int(position["x"]))
+    #     & (bright_pixels[:, 1] < int(position["x"]) + int(position["w"]))  # x の範囲
+    #     & (bright_pixels[:, 0] >= int(position["y"]))
+    #     & (bright_pixels[:, 0] < int(position["y"]) + int(position["h"]))  # y の範囲
+    # ]
+    _dna_data = [d for d in dna_data if int(d["Intensity"]) > roi_thre]
+    dna_x_y = [(int(d["X"]), int(d["Y"])) for d in _dna_data]
+    g_image = imageio.v3.imread(output_path)
+    for x, y in dna_x_y:
+        if 0 <= y < g_image.shape[0] and 0 <= x < g_image.shape[1]:
+            g_image[y, x] = [0, 220, 0, 20]
+
+    _output_path = output_dir + prefix + "-dna-otsu-" + str(thre) + ".png"
+    plt.imsave(_output_path, g_image, cmap="gray", format="png")
     txt_filename = output_dir + position["color"] + ".csv"
     with open(txt_filename, mode="w") as f:
         f.write("\n".join(metadata_list))

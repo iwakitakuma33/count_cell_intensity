@@ -8,7 +8,10 @@ EXTRACTED_DIR = ROOT_DIR + "/extracted_data/"
 csv_filename = POSITION_DIR + "positions.csv"
 
 DEFAULT_COLOR = "green"
-SELECT_COLOR = {}
+SELECT_COLOR = {
+    "Untitled189.czi": "blue",
+    "Untitled197.czi": "blue",
+}
 if __name__ == "__main__":
     try:
         from loci.plugins import BF
