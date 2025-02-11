@@ -7,8 +7,8 @@ import os
 from extract_data import SELECT_COLOR, DEFAULT_COLOR
 
 
-# ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
-ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
+ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
+# ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
 DATA_DIR = ROOT_DIR + "/data/"
 POSITION_DIR = ROOT_DIR + "/positions/"
 EXTRACTED_DIR = ROOT_DIR + "/extracted_data/"
@@ -24,11 +24,11 @@ if not os.path.exists(RESULT_DIR):
     os.makedirs(RESULT_DIR)
 
 csv_filename = POSITION_DIR + "positions.csv"
-THRESHOLD = None
-NORM_PPF_P = 0.2
-PPF_DICT = {"Untitled189.czi": 0.4}
+NORM_PPF_P = 0.5
+PPF_DICT = {"Untitled189.czi": 0.5}
+# PPF_DICT = {"Untitled189.czi": 0.4}
 
-NUM_BINS = 25
+NUM_BINS = 15
 with open(csv_filename, "r") as csvfile:
     reader = csv.DictReader(csvfile)
     data = [row for row in reader]
@@ -139,36 +139,46 @@ for file_name, position in data_dict.items():
             for row in reader
         ]
 
-    threshold = THRESHOLD
-    if not threshold:
-        dna_data_intensity = np.array(
-            [float(d["Intensity"]) for d in dna_data], dtype=np.float32
-        )
-        mean, std = np.mean(dna_data_intensity), np.std(dna_data_intensity)
-        threshold = norm.ppf(PPF_DICT.get(file_name, NORM_PPF_P), mean, std)
-        threshold = max(0, threshold)
+    dna_data_intensity = np.array(
+        [float(d["Intensity"]) for d in dna_data], dtype=np.float32
+    )
+    mean, std = np.mean(dna_data_intensity), np.std(dna_data_intensity)
+    threshold = norm.ppf(PPF_DICT.get(file_name, NORM_PPF_P), mean, std)
+    threshold = max(0, threshold)
 
     print("threshold: " + str(threshold))
     print("row dna data pixels: " + str(len(dna_data)))
-    dna_data = [d for d in dna_data if float(d["Intensity"]) > threshold]
-    dna_data_keys = set(d["Key"] for d in dna_data)
     print("row target data pixels: " + str(len(target_data)))
-    print("filtered dna data pixels: " + str(len(dna_data)))
-    target_data = [d for d in target_data if d["Key"] in dna_data_keys]
-    print("filtered target data pixels: " + str(len(target_data)))
-    target_keys = set(d["Key"] for d in target_data)
-    missing_keys = dna_data_keys - target_keys
-    for key in missing_keys:
-        matching_dna = next(d for d in dna_data if d["Key"] == key)
-        target_data.append(
-            {
-                "Key": key,
-                "X": matching_dna["X"],
-                "Y": matching_dna["Y"],
-                "Intensity": 0,
-            }
-        )
-    print("filled target data pixels: " + str(len(target_data)))
+    dna_data = [d for d in dna_data if float(d["Intensity"]) > threshold]
+    dna_x_y = [(int(d["X"]), int(d["Y"])) for d in dna_data]
+    max_x = max(x for x, y in dna_x_y) + 1
+    max_y = max(y for x, y in dna_x_y) + 1
+    _b_img = np.zeros((max_y, max_x), dtype=np.uint8)
+    for x, y in dna_x_y:
+        _b_img[y, x] = 255
+    contours, _ = cv2.findContours(_b_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    outer_contour = max(contours, key=cv2.contourArea)
+    mask = np.zeros_like(_b_img)
+    cv2.drawContours(mask, [outer_contour], -1, 255, thickness=cv2.FILLED)
+    inner_pixels = np.argwhere(mask == 255)
+    outer_contour_points = [(x, y) for x, y in outer_contour[:, 0, :]]
+    inner_pixels = [(x, y) for y, x in inner_pixels]
+    all_pixels = outer_contour_points + inner_pixels
+    all_pixels_dict = {
+        str(x) + str(y): {
+            "Key": str(x) + str(y),
+            "X": x,
+            "Y": y,
+            "Intensity": 0,
+        }
+        for x, y in all_pixels
+    }
+    print("filtered dna all pixels: " + str(len(all_pixels_dict)))
+    dna_data_keys = {str(x) + str(y): (x, y) for x, y in all_pixels}
+    target_keys = {d["Key"]: d for d in target_data if d["Key"] in dna_data_keys}
+    all_pixels_dict.update(target_keys)
+    target_data = all_pixels_dict.values()
+    print("filled target pixels: " + str(len(all_pixels_dict)))
 
     try:
         int(position["circle_center_x"])

@@ -9,8 +9,8 @@ import imageio
 from copy import deepcopy
 
 
-# ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
-ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
+ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
+# ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
 POSITION_DIR = ROOT_DIR + "/positions/"
 EXTRACTED_DIR = ROOT_DIR + "/extracted_data/"
 THRESHOLD_DIR = ROOT_DIR + "/threshold/"
@@ -94,7 +94,22 @@ for file_name, position in data_dict.items():
         metadata_list.append("\n".join(metadata))
         _dna_data = [d for d in _dna_data if int(d["Intensity"]) > threshold]
         dna_x_y = [(int(d["X"]), int(d["Y"])) for d in _dna_data]
+        max_x = max(x for x, y in dna_x_y) + 1
+        max_y = max(y for x, y in dna_x_y) + 1
+        _b_img = np.zeros((max_y, max_x), dtype=np.uint8)
         for x, y in dna_x_y:
+            _b_img[y, x] = 255
+        contours, _ = cv2.findContours(
+            _b_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
+        outer_contour = max(contours, key=cv2.contourArea)
+        mask = np.zeros_like(_b_img)
+        cv2.drawContours(mask, [outer_contour], -1, 255, thickness=cv2.FILLED)
+        inner_pixels = np.argwhere(mask == 255)
+        outer_contour_points = [(x, y) for x, y in outer_contour[:, 0, :]]
+        inner_pixels = [(x, y) for y, x in inner_pixels]
+        all_pixels = outer_contour_points + inner_pixels
+        for x, y in all_pixels:
             if 0 <= y < g_image.shape[0] and 0 <= x < g_image.shape[1]:
                 g_image[y, x] = [0, 220, 0, 20]
 

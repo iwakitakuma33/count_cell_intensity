@@ -1,5 +1,5 @@
-# ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
-ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
+ROOT_DIR = "/Users/iwakitakuma/count_cell_intensity"
+# ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
 DATA_DIR = ROOT_DIR + "/data/"
 POSITION_DIR = ROOT_DIR + "/positions/"
 EXTRACTED_DIR = ROOT_DIR + "/extracted_data/"
@@ -9,8 +9,8 @@ csv_filename = POSITION_DIR + "positions.csv"
 
 DEFAULT_COLOR = "green"
 SELECT_COLOR = {
-    "Untitled189.czi": "blue",
-    "Untitled197.czi": "blue",
+    "Untitled189.czi": "green",
+    "Untitled197.czi": "green",
 }
 if __name__ == "__main__":
     try:
