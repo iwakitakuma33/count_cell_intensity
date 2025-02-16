@@ -37,7 +37,7 @@ data_dict = {
     if d["color"] == SELECT_COLOR.get(d["file_name"], DEFAULT_COLOR)
 }
 
-
+print(data_dict)
 dna_results = {}
 target_results = {}
 ratio_results = {}

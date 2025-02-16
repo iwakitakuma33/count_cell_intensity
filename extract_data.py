@@ -9,8 +9,15 @@ csv_filename = POSITION_DIR + "positions.csv"
 
 DEFAULT_COLOR = "green"
 SELECT_COLOR = {
-    "Untitled189.czi": "green",
-    "Untitled197.czi": "green",
+    "Untitled195.czi": "blue",
+    "Untitled153.czi": "red",
+    "Untitled225.czi": "red",
+    "Untitled123.czi": "blue",
+    "Untitled240.czi": "red",
+    "Untitled297.czi": "red",
+    "Untitled339.czi": "blue",
+    "Untitled312.czi": "blue",
+    "Untitled138.czi": "blue",
 }
 if __name__ == "__main__":
     try:

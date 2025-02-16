@@ -14,7 +14,7 @@ POSITION_DIR = ROOT_DIR + "/positions/"
 file_names = []
 
 DEFAULT_MARGIN = 1
-MARGIN_DICT = {"Untitled189.czi": 10}
+MARGIN_DICT = {}
 
 if not file_names:
     file_names = os.listdir(DATA_DIR)
@@ -26,16 +26,17 @@ if not os.path.exists(POSITION_DIR):
 
 
 colors = {
-    "blue": (255, 0, 0),
+    "blue": (0, 0, 255),
     "green": (0, 255, 0),
-    "red": (0, 0, 255),
-    "cyan": (255, 255, 0),
+    "red": (255, 0, 0),
+    "cyan": (0, 255, 255),
     "magenta": (255, 0, 255),
-    "yellow": (0, 255, 255),
+    "yellow": (255, 255, 0),
     "gray": (128, 128, 128),
     "lightgray": (192, 192, 192),
-    "orange": (0, 165, 255),
+    "orange": (255, 165, 0),
 }
+
 color_list = list(colors.values())
 color_name_list = list(colors.keys())
 
@@ -99,13 +100,11 @@ def object_position(file_name):
                 margin = MARGIN_DICT.get(file_name, DEFAULT_MARGIN)
                 x, y, w, h = white_object
                 x1, y1 = max(0, x - margin), max(0, y - margin)
-                x1, y1 = max(0, x - margin), max(0, y - margin)
                 w_new, h_new = w + 2 * margin, h + 2 * margin
                 x4, y4 = x1 + w + 2 * margin, y1 + h + 2 * margin
 
                 centroid_x = (x1 + x4) // 2
                 centroid_y = (y1 + y4) // 2
-
                 cv2.rectangle(
                     image_with_objects, (x1, y1), (x4, y4), color_list[idx], 2
                 )
