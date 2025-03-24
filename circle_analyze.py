@@ -11,7 +11,7 @@ ROOT_DIR = "/Users/atsushi/Downloads/count_cell_intensity"
 DATA_DIR = ROOT_DIR + "/data/"
 POSITION_DIR = ROOT_DIR + "/positions/"
 EXTRACTED_DIR = ROOT_DIR + "/extracted_data/"
-RESULT_DIR = ROOT_DIR + "/results/"
+RESULT_DIR = ROOT_DIR + "/circle_results/"
 
 if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)

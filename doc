@@ -9,6 +9,13 @@ python pre_process_czi.py
 imageJで実行
 成果物はextract_dataに出力
 3. analyze.py
+直線の垂線で分割
 pythonで実行
 成果物はresultsに出力
 python analyze.py
+
+4. circle_analyze.py
+中心から扇に分割
+pythonで実行
+成果物はresultsに出力
+python circle_analyze.py
